@@ -143,7 +143,7 @@
     let hourDecimal = (total/60).toFixed(2);
     result += "</tbody><tfoot><tr><th colspan='2'>Total Hours</br /><small>(8h days)</small></th><th>"+ hourDecimal+" Std.<br /><small>("+Math.floor(total/60/8)+"d "+Math.floor((total/60)%8) +"h "+ Math.round(total%60)+"min)</small></th></tr>";
     const hourlyRate = Number.parseInt(document.querySelector('#geld').value, 10)
-    if (hourlyRate !== Number.NaN) {
+    if (hourlyRate !== Number.NaN && hourlyRate > 0 ) {
       const net = formatCurrency(hourDecimal * hourlyRate)
       const tax = formatCurrency(hourDecimal * hourlyRate * 0.19)
       const gross = formatCurrency(hourDecimal * hourlyRate * 1.19)
@@ -196,7 +196,16 @@
     </fieldset>
     <fieldset>
       <legend>Konfiguration</legend>
-      <label for="geld">Stundenlohn: </label><input id="geld" type="text" value="50.0" />
+      <label for="geld">Stundenlohn: </label><input id="geld" type="number" value="90" list="defaultRates" onchange="loadIcs()" />
+      <datalist id="defaultRates">
+        <option value="0">
+        <option value="30">
+        <option value="60">
+        <option value="90">
+        <option value="120">
+        <option value="150">
+        <option value="180">
+      </datalist>
       <p>Zeitraum: <small>(MM/DD/YYYY)</small></p>
       <label for="minAge">Von: </label><input id="minAge" type="date" />
       <label for="maxAge"> bis: </label><input id="maxAge" type="date" />
