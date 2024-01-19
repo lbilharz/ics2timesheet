@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <title>Stundenzettel: Lars Bilharz - 02.Juli - 18.Juli.2008</title>
+  <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="jquery.tablesorter.js" type="text/javascript" charset="utf-8"></script>
+  <script src="jquery-ui-personalized-1.5.2.min.js" type="text/javascript" charset="utf-8"></script>
+  <link type="text/css" href="screen.css" rel="Stylesheet" />
+  <link type="text/css" href="jquery-ui-themeroller.css" rel="Stylesheet" />
+  <!-- http://www.google.com/calendar/feeds/nnhc9g8ss6hqiaekekft371rv4%40group.calendar.google.com/private-17e83cf915fdf28895258605be3c5751/basic -->
+  <script type="text/javascript">
+  <!--
+
+  var xml;
+  var tasks;
+  $(document).ready(function() {
+    const minAge = document.querySelector('#minAge');
+    const maxAge =   document.querySelector('#maxAge');
+
+    const now = new Date();
+    if (minAge.value === "") minAge.value = `${now.getFullYear()}-${fill(now.getMonth() + 1)}-01`;
+    if (maxAge.value === "") maxAge.value = `${now.getFullYear()}-${fill(now.getMonth() + 1)}-${fill(now.getDate())}`;
+    loadIcs();
+  });
+
+  function getJSDateFromICSDate(ISODateTime) {
+    if (ISODateTime.indexOf('T') !== -1) {
+      var [date, time] = ISODateTime.split("T");
+      return new Date(
+          date.substring(0, 4),
+          parseInt(date.substring(4, 6), 10) - 1, date.substring(6, 8),
+          time.substring(0, 2),
+          time.substring(2, 4),
+          0,
+          0
+      );
+    } else {
+      if (window.console) console.error(ISODateTime);
+      return new Date();
+    }
+
+  }
+
+  function getNiceDateString(then, short) {
+    if (short) {
+      return fill(then.getDate()) +"."+ fill((then.getMonth()+1))+"."+then.getFullYear();
+    } else {
+      return fill(then.getDate()) +"."+ fill((then.getMonth()+1))+"."+then.getFullYear() +" "+fill(then.getHours()) +":"+fill(then.getMinutes());
+    }
+  }
+
+  function fill(that) {
+    return that<10?"0"+that:that;
+  }
+
+  function loadIcs() {
+    if (!$('#file').val()) {
+      alert("datei auswählen!");
+    }else {
+      //console.log($('#file').val());
+      //$("#debug").html("Lade: "+$('#file').val());
+      $("#results").html("");
+      $.ajax({
+        type: "GET",
+        url: $('#file').val(),
+        dataType: "text",
+        success: function(text) {
+          parseIcs2XML(text);
+        }
+      });
+    }
+  }
+
+  function parseIcs2XML(text) {
+    xml = text.replace(/;TZID=Europe\/Berlin/gm,"");
+    //xml = xml.replace(/(\&)/,"+");
+    xml = xml.replace(/([A-Z-]+):(.*)/gmi,function(hit,a,b) {
+        if (a=="END"||a=="BEGIN") {
+          return "<"+(a=="END"?"/":"")+b+">‚";
+        } else if (a=="DTSTART" || a=="DTEND" || a=="SUMMARY" || a=="X-WR-CALNAME") { // what else could we need?
+          //console.log("hit="+hit+"\ntype="+a+"\ntag="+b);
+          return "<"+a+">"+b+"</"+a+">";
+        }
+        else return "";
+      });
+    var result = "";
+    xml = xml.replace(/^<(.*)/gmi,function(hit,a) {
+      result += hit;
+      });
+    console.log(result);
+    printXML(result);
+  }
+
+  function printXML(xml,selectedTasks) {
+    //console.log(xml);
+    var tasks = [];
+    //var result = "<table border='1'><thead><tr><th>Tätigkeit</th><th>Beginn</th><th>Ende</th><th>Dauer</th><th class='sort' >Sort</th></tr></thead><tbody>";
+    var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
+    var total = 0;
+    var min = new Date(Date.parse($('#minAge').val()+" 00:00:00"));
+    var max = new Date(Date.parse($('#maxAge').val()+" 23:59:59"));
+    $('#from').html(getNiceDateString(min, true));
+    $('#untill').html(getNiceDateString(max, true));
+    $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedTasks?" ("+ selectedTasks.join(', ') +")":""));
+    document.title = $('body h1').text();
+    //console.log($(xml).find("X-WR-CALNAME:first").text());
+    $(xml).find("VEVENT").each(function() {
+      //if ($(this).find("DTSTART").length==0) console.log($(this));
+      var start = getJSDateFromICSDate($(this).find("DTSTART").text());
+      var end = getJSDateFromICSDate($(this).find("DTEND").text());
+      var duration = (end.getTime()-start.getTime())/1000/60;
+      //console.log($(this).find("SUMMARY").text());
+      if (start.getTime()>min.getTime() && start.getTime()<max.getTime()) {
+        var job = ($(this).find("SUMMARY").text().split('('))[0];
+        if (('$'+tasks.join('$')+'$').indexOf('$'+job+'$')==-1) tasks.push(job);
+        var doContinue = true;
+        if (selectedTasks) {
+          doContinue = false;
+          for (var st=0;st<selectedTasks.length;st++) {
+            if (selectedTasks[st]==job) {
+              doContinue=true;
+              break;
+            }
+          }
+        }
+        if (doContinue) {
+          var hours = Math.floor(duration/60) ? Math.floor(duration/60) + "h " : ""
+          result += "<tr>";
+          total += duration;
+          result += "<td>"+$(this).find("SUMMARY").text()+"</td>";
+          result += "<td>"+ getNiceDateString(start, false)+"</td>";
+          // result += "<td>"+ getNiceDateString(end, false) +"</td>";
+          result += "<td>"+ hours + fill(duration%60) +"min</td>";
+          result += "<td class='sort'>"+ start.getTime()+"</td>";
+          result += "</tr>";
+        }
+      }
+    });
+    result += "</tbody><tfood><tr><th colspan='2'>Total Hours</th><th>"+(total/15/4).toFixed(2)+" Std.<br /><small>("+Math.floor(total/60/8)+"d "+Math.floor((total/60)%8) +"h "+ Math.round(total%60)+"min)</small></th></tr>";
+    /*result += "<tr><th colspan='3'>Netto <small>("+(Math.floor(total/30)/2)+" Std. x "+$('#geld').val()+" € / Std.)</small></th><th>"+(Math.floor(total/30)/2)*$('#geld').val()+" €</th></tr>";
+    result += "<tr><td colspan='3'>MwSt. 19%</td><td>"+(((Math.floor(total/30)/2)*$('#geld').val())*0.19).toFixed(2)+" €</td></tr>";
+    result += "<tr><th colspan='3'>Total</th><th>"+(((Math.floor(total/30)/2)*$('#geld').val())*1.19).toFixed(2)+" €</th></tr>";*/
+    if ($('#geld').val() != 0) {
+      result += "<tr><th colspan='2'>Netto <small>("+(total/15/4).toFixed(2)+" Std. x "+$('#geld').val()+" € / Std.)</small></th><th>"+(total/15/4).toFixed(2)*$('#geld').val()+" €</th></tr>";
+      result += "<tr><td colspan='2'>MwSt. 19%</td><td>"+(((total/15/4).toFixed(2)*$('#geld').val())*0.19).toFixed(2)+" €</td></tr>";
+      result += "<tr><th colspan='2'>Total</th><th>"+(((total/15/4).toFixed(2)*$('#geld').val())*1.19).toFixed(2)+" €</th></tr>";
+
+    }
+    result += "</tfoot></table>";
+    if ($("#results table:first").length==1) $("#results table:first").replaceWith(result);
+    else $("#results").append(result);
+    $("#results table:first").tableSorter({
+        sortColumn: 'Sort',
+        stripingRowClass: ['even','odd'],
+        stripeRowsOnStartUp: true,
+        sortClassAsc: 'selected',
+        sortClassDesc: 'selected',
+      });
+    var select = "<form action='#'><fieldset id='jobs'><legend>Jobs</legend>";
+    for (var i=0; i<tasks.length; i++) {
+      var checked = selectedTasks?('$'+selectedTasks.join('$')+'$').indexOf('$'+tasks[i]+'$')==-1?'':' checked="checked" ':'';
+      select += "<p><input name='tasks' type='checkbox'"+checked+"value='"+tasks[i]+"'>"+tasks[i]+"</p>";
+    }
+    select += "<p><input type='submit' value='Jobs einschränken'/></p></fieldset></form>";
+    if ($('#jobs').length==1) $('#jobs').replaceWith(select);
+    else $('form').after(select);
+
+    $('#jobs input:last').bind('click',{xml:xml},function() {
+      var selection = [];
+      $(':checkbox:checked',$(this).parents('form')).each(function() {
+        selection.push($(this).val());
+      });
+      printXML(xml,selection);
+      return false;
+    });
+  }
+  -->
+  </script>
+
+</head>
+
+<body>
+  <form action="">
+    <fieldset>
+      <legend>Dateiauswahl</legend>
+      <!--<label for="file">Kalender: </label><input id="file" type="text" value="/Hours MedEngine.ics" />-->
+      <!--label for="file">Kalender: </label><input id="file" type="text" value="/CLB Stundenerfassung.ics" /-->
+      <label for="file">Kalender: </label><input id="file" type="text" value="/Stunden Bettermarks.ics" />
+    </fieldset>
+    <fieldset>
+      <legend>Konfiguration</legend>
+      <label for="geld">Stundenlohn: </label><input id="geld" type="text" value="50.0" />
+      <p>Zeitraum: <small>(MM/DD/YYYY)</small></p>
+      <label for="minAge">Von: </label><input id="minAge" type="date" />
+      <label for="maxAge"> bis: </label><input id="maxAge" type="date" />
+      einschließlich.
+    </fieldset>
+    <fieldset>
+      <legend>Abschicken</legend>
+      <input type="submit" value="Laden" onclick="loadIcs(); return false;" />
+    </fieldset>
+  </form>
+  <div id="debug"></div>
+  <h1><span>Lars Bilharz</span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="untill"></span></small></h1>
+  <p></p>
+<div id="results"></div>
+</body>
+</html>
