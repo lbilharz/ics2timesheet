@@ -4,6 +4,7 @@
 
   <title>Stundenzettel</title>
   <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="timeRangePresets.js" type="text/javascript" charset="utf-8"></script>
   <script src="jquery.tablesorter.js" type="text/javascript" charset="utf-8"></script>
 
   <link type="text/css" href="screen.css" rel="Stylesheet" />
@@ -18,11 +19,8 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     minAge = document.querySelector('#minAge');
-    maxAge =   document.querySelector('#maxAge');
-    const now = new Date();
-    if (minAge.value === "") minAge.value = `${now.getFullYear()}-${fill(now.getMonth() + 1)}-01`;
-    if (maxAge.value === "") maxAge.value = `${now.getFullYear()}-${fill(now.getMonth() + 1)}-${fill(now.getDate())}`;
-    loadIcs();
+    maxAge = document.querySelector('#maxAge');
+    loadThisMonth()
   });
 
   function getJSDateFromICSDate(ISODateTime) {
@@ -185,6 +183,14 @@
       <label for="minAge">Von: </label><input id="minAge" type="date" />
       <label for="maxAge"> bis: </label><input id="maxAge" type="date" />
       einschließlich.
+      <p>
+        <input type="button" value="Letzter Monat" onclick="loadLastMonth()" />
+        <input type="button" value="Letzte Woche" onclick="loadLastWeek()" />
+        <input type="button" value="Gestern" onclick="loadYesterday()" />
+        <input type="button" value="Heute" onclick="loadToday()" />
+        <input type="button" value="Diese Woche" onclick="loadThisWeek()" />
+        <input type="button" value="Dieser Monat" onclick="loadThisMonth()" />
+      </p>
     </fieldset>
     <fieldset>
       <legend>Abschicken</legend>
