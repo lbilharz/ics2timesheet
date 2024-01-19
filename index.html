@@ -133,14 +133,23 @@
         }
       }
     });
-    result += "</tbody><tfoot><tr><th colspan='2'>Total Hours</th><th>"+(total/15/4).toFixed(2)+" Std.<br /><small>("+Math.floor(total/60/8)+"d "+Math.floor((total/60)%8) +"h "+ Math.round(total%60)+"min)</small></th></tr>";
-    /*result += "<tr><th colspan='3'>Netto <small>("+(Math.floor(total/30)/2)+" Std. x "+$('#geld').val()+" € / Std.)</small></th><th>"+(Math.floor(total/30)/2)*$('#geld').val()+" €</th></tr>";
-    result += "<tr><td colspan='3'>MwSt. 19%</td><td>"+(((Math.floor(total/30)/2)*$('#geld').val())*0.19).toFixed(2)+" €</td></tr>";
-    result += "<tr><th colspan='3'>Total</th><th>"+(((Math.floor(total/30)/2)*$('#geld').val())*1.19).toFixed(2)+" €</th></tr>";*/
-    if ($('#geld').val() !== 0) {
-      result += "<tr><th colspan='2'>Netto <small>("+(total/15/4).toFixed(2)+" Std. x "+$('#geld').val()+" € / Std.)</small></th><th>"+(total/15/4).toFixed(2)*$('#geld').val()+" €</th></tr>";
-      result += "<tr><td colspan='2'>MwSt. 19%</td><td>"+(((total/15/4).toFixed(2)*$('#geld').val())*0.19).toFixed(2)+" €</td></tr>";
-      result += "<tr><th colspan='2'>Total</th><th>"+(((total/15/4).toFixed(2)*$('#geld').val())*1.19).toFixed(2)+" €</th></tr>";
+
+    function formatCurrency(amount) {
+      return `${amount.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })} €`;
+    }
+    let hourDecimal = (total/60).toFixed(2);
+    result += "</tbody><tfoot><tr><th colspan='2'>Total Hours</br /><small>(8h days)</small></th><th>"+ hourDecimal+" Std.<br /><small>("+Math.floor(total/60/8)+"d "+Math.floor((total/60)%8) +"h "+ Math.round(total%60)+"min)</small></th></tr>";
+    const hourlyRate = Number.parseInt(document.querySelector('#geld').value, 10)
+    if (hourlyRate !== Number.NaN) {
+      const net = formatCurrency(hourDecimal * hourlyRate)
+      const tax = formatCurrency(hourDecimal * hourlyRate * 0.19)
+      const gross = formatCurrency(hourDecimal * hourlyRate * 1.19)
+      result += `<tr><th colspan='2'>Net <small>(${hourDecimal} Std. x ${hourlyRate} € / Std.)</small></th><th>${net}</th></tr>`;
+      result += `<tr><td colspan='2'>Value added Tax 19%</td><td>${tax}</td></tr>`;
+      result += `<tr><th colspan='2'>Gross</th><th>${gross}</th></tr>`;
 
     }
     result += "</tfoot></table>";
