@@ -7,13 +7,9 @@ function formatDate(date) {
   }).format(date).replace(/\//g, '-');
 }
 
-function dateFromISODateTime(isoDateTime) {
-  return formatDate(isoDateTime);
-}
-
 function loadStartEnd(start, end) {
-  minAge.value = dateFromISODateTime(start);
-  maxAge.value = dateFromISODateTime(end);
+  minAge.value = formatDate(start);
+  maxAge.value = formatDate(end);
   loadIcs();
 }
 
