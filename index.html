@@ -3,20 +3,17 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
   <title>Stundenzettel</title>
-  <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="ical.js" type="text/javascript" charset="utf-8"></script>
   <script src="timeRangePresets.js" type="text/javascript" charset="utf-8"></script>
-  <script src="jquery.tablesorter.js" type="text/javascript" charset="utf-8"></script>
 
   <link type="text/css" href="screen.css" rel="Stylesheet" />
-  <!-- http://www.google.com/calendar/feeds/nnhc9g8ss6hqiaekekft371rv4%40group.calendar.google.com/private-17e83cf915fdf28895258605be3c5751/basic -->
   <script type="text/javascript">
 
-  var xml
-  var tasks
+  const jobs = []
+  let selectedJobs = [];
   let minAge
   let maxAge
   const now = new Date();
-  let selectedJobs = [];
   let ics
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -39,25 +36,30 @@
   })
 
   function getJSDateFromICSDate(ISODateTime) {
-    if (ISODateTime.indexOf('T') === -1) {
-      console.warn(ISODateTime);
-      return now;
+    // Check if the string is in ISO 8601 format (with hyphens and colons)
+    if (ISODateTime.includes('-') && ISODateTime.includes('T')) {
+      return new Date(ISODateTime);
     }
-    const [date, time] = ISODateTime.split("T");
-    return new Date(
-      date.substring(0, 4),
-      parseInt(date.substring(4, 6), 10) - 1,
-      date.substring(6, 8),
-      time.substring(0, 2),
-      time.substring(2, 4),
-      0,
-      0
-    )
+    const regex = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/;
+    const match = ISODateTime.match(regex);
+
+    if (!match) {
+      console.warn('Invalid ICS date format:', ISODateTime);
+      return now // Return current date/time if input is invalid
+    }
+
+    const [, year, month, day, hour, minute] = match.map(Number);
+    return new Date(year, month - 1, day, hour, minute);
   }
 
   function getNiceDateString(then, short) {
     if (short) return padStart(then.getDate()) +"."+ padStart((then.getMonth()+1))+"."+then.getFullYear();
     return padStart(then.getDate()) +"."+ padStart((then.getMonth()+1))+"."+then.getFullYear() +" "+padStart(then.getHours()) +":"+padStart(then.getMinutes());
+  }
+
+  function humanizeDuration(duration) {
+    const hours = duration >= 60 ? Math.floor(duration/60) + "' " : ""
+    return hours + padStart(duration%60) +"\""
   }
 
   function padStart(number, targetLength = 2) {
@@ -70,114 +72,109 @@
   }
 
   function parseIcs2XML() {
-    xml = ics.replace(/;TZID=Europe\/Berlin/gm,"");
-    //xml = xml.replace(/(\&)/,"+");
-    xml = xml.replace(/([A-Z-]+):(.*)/gmi,function(hit,a,b) {
-        if (a==="END"||a==="BEGIN") {
-          return "<"+(a==="END"?"/":"")+b+">‚";
-        } else if (a==="DTSTART" || a==="DTEND" || a==="SUMMARY" || a==="X-WR-CALNAME") { // what else could we need?
-          //console.log("hit="+hit+"\ntype="+a+"\ntag="+b);
-          return "<"+a+">"+b+"</"+a+">";
-        }
-        else return "";
-      });
-    var result = "";
-    xml = xml.replace(/^<(.*)/gmi,function(hit,a) {
-      result += hit;
-      });
-    console.log(result);
-    printXML(result);
-  }
-
-  function printXML(xml) {
-    var tasks = [];
-    var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
-    var total = 0;
+    const jcalData = ICAL.parse(ics);
+    const comp = new ICAL.Component(jcalData);
+    const calendarName = comp.getFirstPropertyValue("x-wr-calname");
+    const vevents = comp.getAllSubcomponents("vevent");
+    const jSONEvents = []
     var min = new Date(Date.parse(minAge.value +" 00:00:00"));
     var max = new Date(Date.parse(maxAge.value +" 23:59:59"));
-    $('#from').html(getNiceDateString(min, true));
-    $('#untill').html(getNiceDateString(max, true));
-    $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""));
-    document.title = $('body h1').text();
-
-    $(xml).find("VEVENT").each(function() {
-      var start = getJSDateFromICSDate($(this).find("DTSTART").text());
-      var end = getJSDateFromICSDate($(this).find("DTEND").text());
+    document.getElementById('from').innerText = getNiceDateString(min, true)
+    document.getElementById('until').innerText = getNiceDateString(max, true)
+    vevents.forEach(function(vevent) {
+      const event = new ICAL.Event(vevent);
+      const start = getJSDateFromICSDate(event.startDate.toString());
+      const end = getJSDateFromICSDate(event.endDate.toString());
       var duration = (end.getTime()-start.getTime())/1000/60;
+
+      console.log(start, end, duration);
       if (start.getTime()>min.getTime() && start.getTime()<max.getTime()) {
-        var job = ($(this).find("SUMMARY").text().split('('))[0];
-        if (('$'+tasks.join('$')+'$').indexOf('$'+job+'$') === -1) tasks.push(job);
-        var doContinue = true;
-        if (selectedJobs && selectedJobs.length > 0) {
-          doContinue = false;
-          for (var st=0;st<selectedJobs.length;st++) {
-            if (selectedJobs[st] === job) {
-              doContinue=true;
-              break;
-            }
-          }
-        }
-        if (doContinue) {
-          var hours = Math.floor(duration/60) ? Math.floor(duration/60) + "h " : ""
-          result += "<tr>";
-          total += duration;
-          result += "<td>"+$(this).find("SUMMARY").text()+"</td>";
-          result += "<td>"+ getNiceDateString(start, false)+"</td>";
-          // result += "<td>"+ getNiceDateString(end, false) +"</td>";
-          result += "<td>"+ hours + padStart(duration%60) +"min</td>";
-          result += "<td class='sort'>"+ start.getTime()+"</td>";
-          result += "</tr>";
+        const summary = event.summary;
+        console.log(summary);
+        var job = (summary.split('('))[0].trim()
+        if (!jobs.includes(job)) jobs.push(job)
+        if (!selectedJobs || !selectedJobs.length || selectedJobs.includes(job)) {
+          jSONEvents.push({type: 'event', summary, start, end, duration, job})
         }
       }
+    })
+    jSONEvents.sort((a, b) => {
+      return a.start > b.start ? 1 : -1
+    })
+    printXML(jSONEvents, calendarName);
+  }
+
+  function printXML(json, name) {
+
+    var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
+    const title = `– ${name} –`
+    const selectedJobList = selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""
+    document.getElementById('calName').innerText = title + selectedJobList
+    document.title = document.getElementById('calName').innerText
+
+    let currentDate;
+    let dayTotal = 0;
+    let total = 0;
+    json.forEach(event => {
+      const eventDate = formatDate(event.start);
+      if (!currentDate) {
+        currentDate = eventDate;
+      }
+      if (currentDate !== eventDate) {
+        result += `<tr class="dayTotal"><td colspan="2">${getNiceDateString(new Date(currentDate), true)}</td><td>${humanizeDuration(dayTotal)}</td></tr>`;
+        currentDate = eventDate;
+        dayTotal = 0; // Reset dayTotal when the day changes
+      }
+      total += event.duration;
+      dayTotal += event.duration;
+
+      result += `<tr><td>${event.summary}</td>`;
+      result += `<td>${getNiceDateString(event.start, false)}</td>`;
+      result += `<td>${humanizeDuration(event.duration)}</td>`;
+      result += `<td class='sort'>${event.start.getTime()}</td></tr>`;
     });
+
+    // Add the last day's total if necessary
+    if (dayTotal > 0) {
+      result += `<tr class="dayTotal"><td colspan="2">${getNiceDateString(new Date(currentDate), true)}</td><td>${humanizeDuration(dayTotal)}</td></tr>`;
+    }
 
     function formatCurrency(amount) {
       return `${amount.toLocaleString('de-DE', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      })} €`;
+      })} €`;
     }
-    let hourDecimal = (total/60).toFixed(2);
+    const hourDecimal = (total/60).toFixed(2);
     result += "</tbody><tfoot><tr><th colspan='2'>Total Hours</br /><small>(8h days)</small></th><th>"+ hourDecimal+" Std.<br /><small>("+Math.floor(total/60/8)+"d "+Math.floor((total/60)%8) +"h "+ Math.round(total%60)+"min)</small></th></tr>";
     const hourlyRate = Number.parseInt(document.querySelector('#geld').value, 10)
     if (hourlyRate !== Number.NaN && hourlyRate > 0 ) {
       const net = formatCurrency(hourDecimal * hourlyRate)
       const tax = formatCurrency(hourDecimal * hourlyRate * 0.19)
       const gross = formatCurrency(hourDecimal * hourlyRate * 1.19)
-      result += `<tr><th colspan='2'>Net <small>(${hourDecimal} Std. x ${hourlyRate} € / Std.)</small></th><th>${net}</th></tr>`;
+      result += `<tr><th colspan='2'>Net <small>(${hourDecimal} h x ${formatCurrency(hourlyRate)})</small></th><th>${net}</th></tr>`;
       result += `<tr><td colspan='2'>Value added Tax 19%</td><td>${tax}</td></tr>`;
       result += `<tr><th colspan='2'>Gross</th><th>${gross}</th></tr>`;
 
     }
     result += "</tfoot></table>";
-    if ($("#results table:first").length === 1) $("#results table:first").replaceWith(result);
-    else $("#results").append(result);
-    $("#results table:first").tableSorter({
-        sortColumn: 'Sort',
-        stripingRowClass: ['even','odd'],
-        stripeRowsOnStartUp: true,
-        sortClassAsc: 'selected',
-        sortClassDesc: 'selected',
-      });
-    var select = "<form action='#'><fieldset id='jobs'><legend>Jobs</legend><p>";
-    for (var i=0; i<tasks.length; i++) {
-      const checked = selectedJobs && selectedJobs.includes(tasks[i]) ? ' checked="checked"' : '';
-      if (i !== 0) select += " - ";
-      select += "<span><input name='tasks' type='checkbox'"+checked+"value='"+tasks[i]+"'>"+tasks[i]+"</span>";
+    document.querySelector('#results').innerHTML = result;
+    const jobSelection = ["<legend>Jobs</legend>"];
+    for (var i=0; i<jobs.length; i++) {
+      const checked = selectedJobs && selectedJobs.includes(jobs[i]) ? ' checked="checked"' : '';
+      if (i !== 0) jobSelection.push(" - ")
+      jobSelection.push(`<span><input name='tasks' type='checkbox'${checked} value='${jobs[i]}'>${jobs[i]}</span>`)
     }
-    select += "</p></fieldset></form>";
-    if ($('#jobs').length===1) $('#jobs').replaceWith(select);
-    else $('form').after(select);
+    jobSelection.push("")
+    document.querySelector('#jobs').innerHTML = jobSelection.join('')
 
     document.querySelectorAll('#jobs input[type="checkbox"]').forEach(checkbox => {
       checkbox.addEventListener('click', () => {
         updateSelectedJobs()
-        printXML(xml, selectedJobs);
-        return false;
-      });
-    });
-
-
+        parseIcs2XML()
+        return false
+      })
+    })
   }
   </script>
 </head>
@@ -189,13 +186,13 @@
       <label for="userNameInput">Name of the Freelancer: </label><input id="userNameInput" type="text" value="" />
     </fieldset>
     <fieldset>
-      <legend>Dateiauswahl</legend>
-      <label for="icsFile">Kalender: </label>
+      <legend>Calendar File </legend>
+      <label for="icsFile">Calendar: <small>(.ics)</small></label>
       <input type="file" id="icsFile" accept=".ics">
     </fieldset>
     <fieldset>
-      <legend>Konfiguration</legend>
-      <label for="geld">Stundenlohn: </label><input id="geld" type="number" value="90" list="defaultRates" onchange="loadIcs()" />
+      <legend>Configuration</legend>
+      <label for="geld">Hourly rate: </label><input id="geld" type="number" value="90" list="defaultRates" onchange="parseIcs2XML()" />
       <datalist id="defaultRates">
         <option value="0">
         <option value="30">
@@ -205,21 +202,22 @@
         <option value="150">
         <option value="180">
       </datalist>
-      <p>Zeitraum: <small>(MM.DD.YYYY)</small></p>
-      <label for="minAge">Von: </label><input id="minAge" type="date" />
-      <label for="maxAge"> bis: </label><input id="maxAge" type="date" />
-      einschließlich.
+      <p>Timeframe: <small>(MM.DD.YYYY)</small></p>
+      <label for="minAge">From: </label><input id="minAge" type="date" />
+      <label for="maxAge"> until: </label><input id="maxAge" type="date" />
+      (including)
       <p>
-        <input type="button" value="Letzter Monat" onclick="loadLastMonth()" />
-        <input type="button" value="Letzte Woche" onclick="loadLastWeek()" />
-        <input type="button" value="Gestern" onclick="loadYesterday()" />
-        <input type="button" value="Heute" onclick="loadToday()" />
-        <input type="button" value="Diese Woche" onclick="loadThisWeek()" />
-        <input type="button" value="Dieser Monat" onclick="loadThisMonth()" />
+        <input type="button" value="Last Month" onclick="loadLastMonth()" />
+        <input type="button" value="Last Week" onclick="loadLastWeek()" />
+        <input type="button" value="Yesterday" onclick="loadYesterday()" />
+        <input type="button" value="Today" onclick="loadToday()" />
+        <input type="button" value="This Week" onclick="loadThisWeek()" />
+        <input type="button" value="This Month" onclick="loadThisMonth()" />
       </p>
     </fieldset>
+    <fieldset id='jobs'><legend>Jobs</legend></fieldset>
   </form>
-  <h1><span id="userName"></span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="untill"></span></small></h1>
+  <h1><span id="userName"></span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="until"></span></small></h1>
 <div id="results"></div>
 </body>
 </html>

@@ -52,8 +52,9 @@ td[colspan] {
   text-align: right!important;
 }
 
-.odd {
-  background: lightgrey;
+tr.dayTotal td {
+  color: gray;
+  border-top: 2px solid lightgray;
 }
 
 .selected {
