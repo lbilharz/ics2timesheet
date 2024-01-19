@@ -1,26 +1,25 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html lang="de">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
   <title>Stundenzettel: Lars Bilharz - 02.Juli - 18.Juli.2008</title>
   <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
   <script src="jquery.tablesorter.js" type="text/javascript" charset="utf-8"></script>
-  <script src="jquery-ui-personalized-1.5.2.min.js" type="text/javascript" charset="utf-8"></script>
+
   <link type="text/css" href="screen.css" rel="Stylesheet" />
-  <link type="text/css" href="jquery-ui-themeroller.css" rel="Stylesheet" />
   <!-- http://www.google.com/calendar/feeds/nnhc9g8ss6hqiaekekft371rv4%40group.calendar.google.com/private-17e83cf915fdf28895258605be3c5751/basic -->
   <script type="text/javascript">
   <!--
 
-  var xml;
-  var tasks;
-  $(document).ready(function() {
-    const minAge = document.querySelector('#minAge');
-    const maxAge =   document.querySelector('#maxAge');
+  var xml
+  var tasks
+  let minAge
+  let maxAge
 
+
+  $(document).ready(function() {
+    minAge = document.querySelector('#minAge');
+    maxAge =   document.querySelector('#maxAge');
     const now = new Date();
     if (minAge.value === "") minAge.value = `${now.getFullYear()}-${fill(now.getMonth() + 1)}-01`;
     if (maxAge.value === "") maxAge.value = `${now.getFullYear()}-${fill(now.getMonth() + 1)}-${fill(now.getDate())}`;
@@ -79,9 +78,9 @@
     xml = text.replace(/;TZID=Europe\/Berlin/gm,"");
     //xml = xml.replace(/(\&)/,"+");
     xml = xml.replace(/([A-Z-]+):(.*)/gmi,function(hit,a,b) {
-        if (a=="END"||a=="BEGIN") {
-          return "<"+(a=="END"?"/":"")+b+">‚";
-        } else if (a=="DTSTART" || a=="DTEND" || a=="SUMMARY" || a=="X-WR-CALNAME") { // what else could we need?
+        if (a==="END"||a==="BEGIN") {
+          return "<"+(a==="END"?"/":"")+b+">‚";
+        } else if (a==="DTSTART" || a==="DTEND" || a==="SUMMARY" || a==="X-WR-CALNAME") { // what else could we need?
           //console.log("hit="+hit+"\ntype="+a+"\ntag="+b);
           return "<"+a+">"+b+"</"+a+">";
         }
@@ -96,13 +95,11 @@
   }
 
   function printXML(xml,selectedTasks) {
-    //console.log(xml);
     var tasks = [];
-    //var result = "<table border='1'><thead><tr><th>Tätigkeit</th><th>Beginn</th><th>Ende</th><th>Dauer</th><th class='sort' >Sort</th></tr></thead><tbody>";
     var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
     var total = 0;
-    var min = new Date(Date.parse($('#minAge').val()+" 00:00:00"));
-    var max = new Date(Date.parse($('#maxAge').val()+" 23:59:59"));
+    var min = new Date(Date.parse(minAge.value +" 00:00:00"));
+    var max = new Date(Date.parse(maxAge.value +" 23:59:59"));
     $('#from').html(getNiceDateString(min, true));
     $('#untill').html(getNiceDateString(max, true));
     $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedTasks?" ("+ selectedTasks.join(', ') +")":""));
