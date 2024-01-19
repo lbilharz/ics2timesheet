@@ -106,7 +106,7 @@
 
   function printXML(json, name) {
 
-    var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
+    var result = "<table><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
     const title = `– ${name} –`
     const selectedJobList = selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""
     document.getElementById('calName').innerText = title + selectedJobList

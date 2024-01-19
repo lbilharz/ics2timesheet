@@ -15,7 +15,7 @@ table.ui-datepicker {
 
 table, form, h1 {
   max-width: 90vw;
-  min-width: 800px;
+  min-width: 600px;
 }
 
 table {
@@ -27,6 +27,7 @@ table {
 td, th {
   padding: 3px;
   text-align: right;
+  border-bottom: 1px solid;
 }
 
 thead th {
@@ -54,7 +55,8 @@ td[colspan] {
 
 tr.dayTotal td {
   color: gray;
-  border-top: 2px solid lightgray;
+  border-top: 4px solid lightgray;
+  margin-bottom: .3em;
 }
 
 .selected {
