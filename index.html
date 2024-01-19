@@ -16,6 +16,7 @@
   let minAge
   let maxAge
   const now = new Date();
+  let selectedJobs = [];
 
   document.addEventListener('DOMContentLoaded', function() {
     minAge = document.querySelector('#minAge');
@@ -46,6 +47,11 @@
 
   function padStart(number, targetLength = 2) {
     return String(number).padStart(targetLength, '0');
+  }
+
+  function updateSelectedJobs() {
+    const checkboxes = document.querySelectorAll('#jobs input[type="checkbox"]:checked');
+    selectedJobs = Array.from(checkboxes).map(checkbox => checkbox.value);
   }
 
   function loadIcs() {
@@ -85,7 +91,8 @@
     printXML(result);
   }
 
-  function printXML(xml,selectedTasks) {
+  function printXML(xml) {
+
     var tasks = [];
     var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
     var total = 0;
@@ -93,7 +100,7 @@
     var max = new Date(Date.parse(maxAge.value +" 23:59:59"));
     $('#from').html(getNiceDateString(min, true));
     $('#untill').html(getNiceDateString(max, true));
-    $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedTasks?" ("+ selectedTasks.join(', ') +")":""));
+    $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedJobs?" ("+ selectedJobs.join(', ') +")":""));
     document.title = $('body h1').text();
 
     $(xml).find("VEVENT").each(function() {
@@ -104,10 +111,10 @@
         var job = ($(this).find("SUMMARY").text().split('('))[0];
         if (('$'+tasks.join('$')+'$').indexOf('$'+job+'$') === -1) tasks.push(job);
         var doContinue = true;
-        if (selectedTasks) {
+        if (selectedJobs && selectedJobs.length > 0) {
           doContinue = false;
-          for (var st=0;st<selectedTasks.length;st++) {
-            if (selectedTasks[st] === job) {
+          for (var st=0;st<selectedJobs.length;st++) {
+            if (selectedJobs[st] === job) {
               doContinue=true;
               break;
             }
@@ -130,7 +137,7 @@
     /*result += "<tr><th colspan='3'>Netto <small>("+(Math.floor(total/30)/2)+" Std. x "+$('#geld').val()+" € / Std.)</small></th><th>"+(Math.floor(total/30)/2)*$('#geld').val()+" €</th></tr>";
     result += "<tr><td colspan='3'>MwSt. 19%</td><td>"+(((Math.floor(total/30)/2)*$('#geld').val())*0.19).toFixed(2)+" €</td></tr>";
     result += "<tr><th colspan='3'>Total</th><th>"+(((Math.floor(total/30)/2)*$('#geld').val())*1.19).toFixed(2)+" €</th></tr>";*/
-    if ($('#geld').val() != 0) {
+    if ($('#geld').val() !== 0) {
       result += "<tr><th colspan='2'>Netto <small>("+(total/15/4).toFixed(2)+" Std. x "+$('#geld').val()+" € / Std.)</small></th><th>"+(total/15/4).toFixed(2)*$('#geld').val()+" €</th></tr>";
       result += "<tr><td colspan='2'>MwSt. 19%</td><td>"+(((total/15/4).toFixed(2)*$('#geld').val())*0.19).toFixed(2)+" €</td></tr>";
       result += "<tr><th colspan='2'>Total</th><th>"+(((total/15/4).toFixed(2)*$('#geld').val())*1.19).toFixed(2)+" €</th></tr>";
@@ -146,23 +153,25 @@
         sortClassAsc: 'selected',
         sortClassDesc: 'selected',
       });
-    var select = "<form action='#'><fieldset id='jobs'><legend>Jobs</legend>";
+    var select = "<form action='#'><fieldset id='jobs'><legend>Jobs</legend><p>";
     for (var i=0; i<tasks.length; i++) {
-      var checked = selectedTasks?('$'+selectedTasks.join('$')+'$').indexOf('$'+tasks[i]+'$')==-1?'':' checked="checked" ':'';
-      select += "<p><input name='tasks' type='checkbox'"+checked+"value='"+tasks[i]+"'>"+tasks[i]+"</p>";
+      const checked = selectedJobs && selectedJobs.includes(tasks[i]) ? ' checked="checked"' : '';
+      if (i !== 0) select += " - ";
+      select += "<span><input name='tasks' type='checkbox'"+checked+"value='"+tasks[i]+"'>"+tasks[i]+"</span>";
     }
-    select += "<p><input type='submit' value='Jobs einschränken'/></p></fieldset></form>";
-    if ($('#jobs').length==1) $('#jobs').replaceWith(select);
+    select += "</p></fieldset></form>";
+    if ($('#jobs').length===1) $('#jobs').replaceWith(select);
     else $('form').after(select);
 
-    $('#jobs input:last').bind('click',{xml:xml},function() {
-      var selection = [];
-      $(':checkbox:checked',$(this).parents('form')).each(function() {
-        selection.push($(this).val());
+    document.querySelectorAll('#jobs input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('click', () => {
+        updateSelectedJobs()
+        printXML(xml, selectedJobs);
+        return false;
       });
-      printXML(xml,selection);
-      return false;
     });
+
+
   }
   </script>
 
