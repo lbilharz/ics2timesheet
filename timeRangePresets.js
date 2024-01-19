@@ -1,5 +1,14 @@
+
+function formatDate(date) {
+  return new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date).replace(/\//g, '-');
+}
+
 function dateFromISODateTime(isoDateTime) {
-  return `${isoDateTime.getFullYear()}-${padStart(isoDateTime.getMonth()+1)}-${padStart(isoDateTime.getDate())}`
+  return formatDate(isoDateTime);
 }
 
 function loadStartEnd(start, end) {
