@@ -17,12 +17,26 @@
   let maxAge
   const now = new Date();
   let selectedJobs = [];
+  let ics
 
   document.addEventListener('DOMContentLoaded', function() {
     minAge = document.querySelector('#minAge');
     maxAge = document.querySelector('#maxAge');
-    loadThisMonth()
-  });
+    document.querySelector('#userNameInput').addEventListener('change', function(event) {
+      document.querySelector('#userName').innerHTML = event.target.value;
+    })
+    document.querySelector('#icsFile').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          ics = e.target.result;
+          loadThisMonth()
+        }
+        reader.readAsText(file);
+      }
+    })
+  })
 
   function getJSDateFromICSDate(ISODateTime) {
     if (ISODateTime.indexOf('T') === -1) {
@@ -31,12 +45,13 @@
     }
     const [date, time] = ISODateTime.split("T");
     return new Date(
-        date.substring(0, 4),
-        parseInt(date.substring(4, 6), 10) - 1, date.substring(6, 8),
-        time.substring(0, 2),
-        time.substring(2, 4),
-        0,
-        0
+      date.substring(0, 4),
+      parseInt(date.substring(4, 6), 10) - 1,
+      date.substring(6, 8),
+      time.substring(0, 2),
+      time.substring(2, 4),
+      0,
+      0
     )
   }
 
@@ -54,25 +69,8 @@
     selectedJobs = Array.from(checkboxes).map(checkbox => checkbox.value);
   }
 
-  function loadIcs() {
-    const file = document.querySelector('#file');
-    if (!file.value) {
-      alert("datei auswählen!");
-    } else {
-      $("#results").html("");
-      $.ajax({
-        type: "GET",
-        url: file.value,
-        dataType: "text",
-        success: function(text) {
-          parseIcs2XML(text);
-        }
-      });
-    }
-  }
-
-  function parseIcs2XML(text) {
-    xml = text.replace(/;TZID=Europe\/Berlin/gm,"");
+  function parseIcs2XML() {
+    xml = ics.replace(/;TZID=Europe\/Berlin/gm,"");
     //xml = xml.replace(/(\&)/,"+");
     xml = xml.replace(/([A-Z-]+):(.*)/gmi,function(hit,a,b) {
         if (a==="END"||a==="BEGIN") {
@@ -92,7 +90,6 @@
   }
 
   function printXML(xml) {
-
     var tasks = [];
     var result = "<table border='1'><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
     var total = 0;
@@ -100,7 +97,7 @@
     var max = new Date(Date.parse(maxAge.value +" 23:59:59"));
     $('#from').html(getNiceDateString(min, true));
     $('#untill').html(getNiceDateString(max, true));
-    $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedJobs?" ("+ selectedJobs.join(', ') +")":""));
+    $('#calName').html("-"+$(xml).find("X-WR-CALNAME:first").text()+"-" + (selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""));
     document.title = $('body h1').text();
 
     $(xml).find("VEVENT").each(function() {
@@ -183,16 +180,18 @@
 
   }
   </script>
-
 </head>
 
 <body>
   <form action="">
     <fieldset>
+      <legend>Name</legend>
+      <label for="userNameInput">Name of the Freelancer: </label><input id="userNameInput" type="text" value="" />
+    </fieldset>
+    <fieldset>
       <legend>Dateiauswahl</legend>
-      <!--<label for="file">Kalender: </label><input id="file" type="text" value="/Hours MedEngine.ics" />-->
-      <!--label for="file">Kalender: </label><input id="file" type="text" value="/CLB Stundenerfassung.ics" /-->
-      <label for="file">Kalender: </label><input id="file" type="text" value="/Stunden Bettermarks.ics" />
+      <label for="icsFile">Kalender: </label>
+      <input type="file" id="icsFile" accept=".ics">
     </fieldset>
     <fieldset>
       <legend>Konfiguration</legend>
@@ -206,7 +205,7 @@
         <option value="150">
         <option value="180">
       </datalist>
-      <p>Zeitraum: <small>(MM/DD/YYYY)</small></p>
+      <p>Zeitraum: <small>(MM.DD.YYYY)</small></p>
       <label for="minAge">Von: </label><input id="minAge" type="date" />
       <label for="maxAge"> bis: </label><input id="maxAge" type="date" />
       einschließlich.
@@ -219,14 +218,8 @@
         <input type="button" value="Dieser Monat" onclick="loadThisMonth()" />
       </p>
     </fieldset>
-    <fieldset>
-      <legend>Abschicken</legend>
-      <input type="submit" value="Laden" onclick="loadIcs(); return false;" />
-    </fieldset>
   </form>
-  <div id="debug"></div>
-  <h1><span>Lars Bilharz</span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="untill"></span></small></h1>
-  <p></p>
+  <h1><span id="userName"></span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="untill"></span></small></h1>
 <div id="results"></div>
 </body>
 </html>
