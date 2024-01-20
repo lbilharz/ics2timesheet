@@ -4,6 +4,7 @@
 
   <title>Stundenzettel</title>
   <script src="ical.js" type="text/javascript" charset="utf-8"></script>
+  <script src="stroage.js" type="text/javascript" charset="utf-8"></script>
   <script src="timeRangePresets.js" type="text/javascript" charset="utf-8"></script>
 
   <link type="text/css" href="screen.css" rel="Stylesheet" />
@@ -15,12 +16,14 @@
   let maxAge
   const now = new Date();
   let ics
+  let webcalURL = undefined
 
   document.addEventListener('DOMContentLoaded', function() {
+    populateDropdown();
+
     document.querySelector('#calendarForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent the default form submission
-
-      const webcalURL = document.getElementById('calendarUrl').value;
+      webcalURL = document.getElementById('calendarUrl').value;
       const calendarUrl = "/calendar?url=" + encodeURIComponent(webcalURL);
       fetch(calendarUrl)
         .then(response => response.text())
@@ -87,9 +90,15 @@
   }
 
   function parseIcs2XML() {
+    jobs.length = 0;
     const jcalData = ICAL.parse(ics);
     const comp = new ICAL.Component(jcalData);
     const calendarName = comp.getFirstPropertyValue("x-wr-calname");
+    if (webcalURL) {
+      storeUrl(calendarName, webcalURL);
+      populateDropdown();
+      webcalURL = undefined;
+    }
     const vevents = comp.getAllSubcomponents("vevent");
     const jSONEvents = []
     var min = new Date(Date.parse(minAge.value +" 00:00:00"));
@@ -170,7 +179,7 @@
     }
     result += "</tfoot></table>";
     document.querySelector('#results').innerHTML = result;
-    const jobSelection = ["<legend>Jobs</legend>"];
+    const jobSelection = [];
     for (var i=0; i<jobs.length; i++) {
       const checked = selectedJobs && selectedJobs.includes(jobs[i]) ? ' checked="checked"' : '';
       if (i !== 0) jobSelection.push(" - ")
@@ -196,11 +205,14 @@
     <legend>WebCal</legend>
     <input type="text" id="calendarUrl" placeholder="Enter calendar URL">
     <button type="submit">Fetch Calendar</button>
+    <p><small>Example: Publish your tracking calendar and provide the URL here. eg. <code>webcal://caldav.icloud.com/published/…</code><br/>The calendar file needs to be piped through a internal CORS-Proxy into the local handling.<br/>There is no caching or server side storage.</small></p>
+    <label>Recent Calendars: <select id="urlDropdown"></select></label>
   </fieldset>
   <fieldset>
     <legend>Calendar File </legend>
     <label for="icsFile">Calendar: <small>(.ics)</small></label>
     <input type="file" id="icsFile" accept=".ics">
+    <p><small>Example: You can export your tracking calendar as <code>.ics</code> file, and load it here.<br/>The calendar will not be uploaded but just handled in this browser window.</small></p>
   </fieldset>
 </form>
   <form action="">
@@ -233,7 +245,10 @@
         <input type="button" value="This Month" onclick="loadThisMonth()" />
       </p>
     </fieldset>
-    <fieldset id='jobs'><legend>Jobs</legend></fieldset>
+    <fieldset><legend>Jobs</legend>
+      <div id="jobs"></div>
+      <p><small>Example: If you select none, all jobs are active.<br/>You can select the jobs you want to include in the calculation.<br/>The time sheet will allow filtering on certain jobs<br/>by adding the event in brackets <code>(</code> to the title of the calendar event. eg. <code>JobName (Event)</code></small></p>
+    </fieldset>
   </form>
   <h1><span id="userName"></span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="until"></span></small></h1>
 <div id="results"></div>
