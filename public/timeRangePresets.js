@@ -28,9 +28,9 @@ function loadThisMonth() {
   var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   loadStartEnd(firstDay, lastDay);
 }
-function loadLastMonth() {
+function loadLastMonth(monthsAgo = 1) {
   var now = new Date();
-  var firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  var firstDay = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
   var lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
   loadStartEnd(firstDay, lastDay);
 }
