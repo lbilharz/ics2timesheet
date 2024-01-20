@@ -60,5 +60,7 @@ function populateDropdown() {
     document.querySelector('#calendarForm').dispatchEvent(new Event('submit'));
   }
   document.getElementById('urlDropdown').addEventListener('change', onDropdownChange);
-
+  if (urls.length > 0) {
+    document.getElementById('urlDropdown').classList.remove('hidden');
+  }
 }
