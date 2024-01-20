@@ -12,9 +12,14 @@ Extract a timesheet from a calendar file. You can set an hourly rate and the tim
 
 There are serveral short hands for the time frame you want to bill: `today`, `yesterday`, `this week`, `last week`, `this month`, `last month` …
 
-The timesheet will be generated as printable HTML view. Chrome is recommended for printing, as it supports repeating table headers.
+The generated timesheet will be grouped by days and list the hours you worked on each day.  
 
-### Usage
+
+The timesheet will be generated as printable HTML view. 
+
+Chrome is recommended for printing, as it supports repeating table headers.
+
+### Usage via exported calendar file
 
 1. Export your calendar as an `.ics` file.
 2. Open the exported file in the file selection dialog on the site.
@@ -22,3 +27,8 @@ The timesheet will be generated as printable HTML view. Chrome is recommended fo
 4. The timesheet will allow filtering on specific jobs. To do this, add the event in parentheses `()` to the title of the calendar event. For example: `JobName (Event)`.
 
 
+### Usage via webcal link
+1. Share your calendar via webcal link, copy the link.
+1. paste and load the webcal link in the input field
+2. Select the time range for which you want the timesheet to be generated.
+3. The timesheet will allow filtering on specific jobs. To do this, add the event in parentheses `()` to the title of the calendar event. For example: `JobName (Event)`.
