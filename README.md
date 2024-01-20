@@ -28,11 +28,11 @@ This is my personal tool designed for my own use. You're welcome to try it at [i
 3. Choose the billing period.
 4. Use the parentheses format for job filtering.
 
----
 
-Enjoy a more streamlined way of creating timesheets with *ics2timesheet*! Simplify your workflow and focus on what you do best. 🌴💻📅
+> Enjoy a more streamlined way of creating timesheets with *ics2timesheet*! Simplify your workflow and focus on what you do best. 🌴💻📅
 
-## 💻 Setting Up `ics2timesheet`
+
+## 💻 Setting Up `ics2timesheet` locally
 
 Want to run `ics2timesheet` locally? Here’s how to get it up and running on your machine.
 
