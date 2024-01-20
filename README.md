@@ -1,34 +1,33 @@
-## Disclaimer
+## 🌟 Welcome to ics2timesheet!
 
-> **DISCLAIMER:** This is a personal project, used to generate my own timesheets. It is not intended for public use.
->
-> If you wish to use it, feel free to do so at [ics.bilharz.net](http://ics.bilharz.net).
->
-> However, please note that I may not provide extensive support, but you can still ask questions.
+Hello digital nomads and freelancers! Struggling with timesheet creation? *ics2timesheet* is here to help. This tool transforms your calendar events into a well-organized timesheet, making life a bit easier. 🚀
 
-## ics2timesheet
+### 📣 Disclaimer
 
-Extract a timesheet from a calendar file. You can set an hourly rate and the timesheet will calculate the total amount of money you earned. including added value tax (VAT) of 19%.
+This is my personal tool designed for my own use. You're welcome to try it at [ics.bilharz.net](http://ics.bilharz.net). Remember, it's a "use-at-your-own-risk" solution. Questions? Feel free to ask, and I'll try to help out! ✨
 
-There are serveral short hands for the time frame you want to bill: `today`, `yesterday`, `this week`, `last week`, `this month`, `last month` …
+### 🎩 Features
 
-The generated timesheet will be grouped by days and list the hours you worked on each day.  
+*ics2timesheet* automates the conversion of your calendar file into a timesheet. It includes total earnings calculations and VAT (19%).
 
+- **Timeframe Shortcuts**: Easily bill for 'today', 'yesterday', 'this week', 'last week', 'this month', or 'last month'.
+- **Daily Groupings**: Your work hours are grouped by day for clarity.
+- **Printable Format**: Get a print-friendly HTML timesheet, best viewed in Chrome for proper table header formatting.
 
-The timesheet will be generated as printable HTML view. 
+### 🚀 How to Use
 
-Chrome is recommended for printing, as it supports repeating table headers.
-
-### Usage via exported calendar file
-
+#### With an `.ics` File:
 1. Export your calendar as an `.ics` file.
-2. Open the exported file in the file selection dialog on the site.
-3. Select the time range for which you want the timesheet to be generated.
-4. The timesheet will allow filtering on specific jobs. To do this, add the event in parentheses `()` to the title of the calendar event. For example: `JobName (Event)`.
+2. Go to [ics.bilharz.net](http://ics.bilharz.net) and upload your file.
+3. Select the desired time range for billing.
+4. To filter jobs, add them in parentheses in your event title (e.g., `Coding Session (Project X)`).
 
+#### With a Webcal Link:
+1. Copy your webcal link.
+2. Paste it into [ics.bilharz.net](http://ics.bilharz.net).
+3. Choose the billing period.
+4. Use the parentheses format for job filtering.
 
-### Usage via webcal link
-1. Share your calendar via webcal link, copy the link.
-1. paste and load the webcal link in the input field
-2. Select the time range for which you want the timesheet to be generated.
-3. The timesheet will allow filtering on specific jobs. To do this, add the event in parentheses `()` to the title of the calendar event. For example: `JobName (Event)`.
+---
+
+Enjoy a more streamlined way of creating timesheets with *ics2timesheet*! Simplify your workflow and focus on what you do best. 🌴💻📅
