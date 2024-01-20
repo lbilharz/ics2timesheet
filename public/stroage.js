@@ -1,3 +1,16 @@
+function storeUserName(name) {
+  localStorage.setItem('userName', name);
+}
+function getStoredUserName() {
+  return localStorage.getItem('userName');
+}
+function populateUserName() {
+  let userName = getStoredUserName();
+  if (userName) {
+    document.getElementById('userNameInput').value = userName;
+  }
+}
+
 function storeUrl(name, url) {
   let urls = JSON.parse(localStorage.getItem('webcalUrls')) || [];
 
@@ -28,7 +41,7 @@ function populateDropdown() {
   dropdown.innerHTML = ''
   let option = document.createElement('option');
   option.value = '';
-  option.textContent = 'Recent URLs'
+  option.textContent = 'Recent Calendars'
   dropdown.appendChild(option);
 
   urls.forEach(item => {

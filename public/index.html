@@ -20,6 +20,7 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     populateDropdown();
+    populateUserName();
 
     document.querySelector('#calendarForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent the default form submission
@@ -222,7 +223,14 @@
     </fieldset>
     <fieldset>
       <legend>Configuration</legend>
-      <label for="geld">Hourly rate: </label><input id="geld" type="number" value="90" list="defaultRates" onchange="parseIcs2XML()" />
+      <label for="userNameInput">Your name: </label>
+      <input id="userNameInput" type="text" value="" onchange="storeUserName(this.value)" />
+      <p>
+        <label for="geld">Your rate </label>
+        <input id="geld" type="number" style="width: 5em;" value="90" list="defaultRates" onchange="parseIcs2XML()" />€/h
+        <label for="vat">VAT </label>
+        <input id="vat" type="number" style="width: 5em;" value="19" list="defaultVATs" onchange="parseIcs2XML()" />%
+      </p>
       <datalist id="defaultRates">
         <option value="0">
         <option value="30">
