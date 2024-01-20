@@ -1,0 +1,29 @@
+{
+  "type": "module",
+  "name": "ics2timesheet",
+  "version": "1.0.0",
+  "description": "convert webcal to timesheet on the fly",
+  "main": "index.js",
+  "engines": {
+    "node": "v16.x"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lbilharz/ics2timesheet.git"
+  },
+  "author": "lars bilharz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lbilharz/ics2timesheet/issues"
+  },
+  "homepage": "https://github.com/lbilharz/ics2timesheet#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
+  }
+}

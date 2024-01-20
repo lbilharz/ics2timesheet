@@ -13,7 +13,7 @@ table.ui-datepicker {
   margin-top: 30px;
 }
 
-table, form, h1 {
+table, form, h1, fieldset {
   max-width: 90vw;
   min-width: 600px;
 }

@@ -17,6 +17,21 @@
   let ics
 
   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('#calendarForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      const webcalURL = document.getElementById('calendarUrl').value;
+      const calendarUrl = "/calendar?url=" + encodeURIComponent(webcalURL);
+      fetch(calendarUrl)
+        .then(response => response.text())
+        .then(data => {
+          ics = data
+          loadThisMonth()
+        })
+        .catch(error => console.error('Error fetching calendar:', error));
+    });
+
+
     minAge = document.querySelector('#minAge');
     maxAge = document.querySelector('#maxAge');
     document.querySelector('#userNameInput').addEventListener('change', function(event) {
@@ -86,11 +101,8 @@
       const start = getJSDateFromICSDate(event.startDate.toString());
       const end = getJSDateFromICSDate(event.endDate.toString());
       var duration = (end.getTime()-start.getTime())/1000/60;
-
-      console.log(start, end, duration);
       if (start.getTime()>min.getTime() && start.getTime()<max.getTime()) {
         const summary = event.summary;
-        console.log(summary);
         var job = (summary.split('('))[0].trim()
         if (!jobs.includes(job)) jobs.push(job)
         if (!selectedJobs || !selectedJobs.length || selectedJobs.includes(job)) {
@@ -105,7 +117,6 @@
   }
 
   function printXML(json, name) {
-
     var result = "<table><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
     const title = `– ${name} –`
     const selectedJobList = selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""
@@ -180,15 +191,22 @@
 </head>
 
 <body>
+<form id="calendarForm">
+  <fieldset>
+    <legend>WebCal</legend>
+    <input type="text" id="calendarUrl" placeholder="Enter calendar URL">
+    <button type="submit">Fetch Calendar</button>
+  </fieldset>
+  <fieldset>
+    <legend>Calendar File </legend>
+    <label for="icsFile">Calendar: <small>(.ics)</small></label>
+    <input type="file" id="icsFile" accept=".ics">
+  </fieldset>
+</form>
   <form action="">
     <fieldset>
       <legend>Name</legend>
       <label for="userNameInput">Name of the Freelancer: </label><input id="userNameInput" type="text" value="" />
-    </fieldset>
-    <fieldset>
-      <legend>Calendar File </legend>
-      <label for="icsFile">Calendar: <small>(.ics)</small></label>
-      <input type="file" id="icsFile" accept=".ics">
     </fieldset>
     <fieldset>
       <legend>Configuration</legend>
