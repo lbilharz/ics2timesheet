@@ -1,12 +1,12 @@
 {
+  "engines": {
+    "node": "v16.x"
+  },
   "type": "module",
   "name": "ics2timesheet",
   "version": "1.0.0",
   "description": "convert webcal to timesheet on the fly",
   "main": "index.js",
-  "engines": {
-    "node": "v16.x"
-  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
