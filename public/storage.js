@@ -8,31 +8,31 @@ function populateUserName() {
   let userName = getStoredUserName();
   if (userName) {
     document.getElementById('userNameInput').value = userName;
+    document.getElementById('userName').innerHTML = userName;
   }
+}
+function storeShowDailySummary(checked) {
+  localStorage.setItem('showDailySummary', checked);
+  parseCalendarInput()
+}
+function getStoreShowDailySummary() {
+  return localStorage.getItem('showDailySummary') === 'true' ;
+}
+function populateShowDailySummary() {
+  document.getElementById('dailySummaries').checked = getStoreShowDailySummary() ? 'checked' : '';
 }
 
 function storeUrl(name, url) {
   let urls = JSON.parse(localStorage.getItem('webcalUrls')) || [];
-
-  // Check if the URL already exists
-  const urlExists = urls.some(item => item.url === url);
-
-  if (!urlExists) {
-    // Add the new object to the array
-    urls.push({ name, url });
-
-    // Save the updated array back to local storage
-    localStorage.setItem('webcalUrls', JSON.stringify(urls));
-  } else {
+  if (urls.some(item => item.url === url)) {
     console.log('URL already exists in local storage.');
+    return false;
   }
+  urls.push({ name, url });
+  localStorage.setItem('webcalUrls', JSON.stringify(urls));
 }
 function getStoredUrls() {
-  // Fetch the array from local storage
-  let urls = JSON.parse(localStorage.getItem('webcalUrls'));
-
-  // Return the array or an empty array if it doesn't exist
-  return urls || [];
+  return JSON.parse(localStorage.getItem('webcalUrls')) || [];
 }
 
 function populateDropdown() {

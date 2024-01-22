@@ -36,9 +36,9 @@
       <input id="userNameInput" type="text" value="" onchange="storeUserName(this.value)" />
       <p>
         <label for="geld">Your rate </label>
-        <input id="geld" type="number" style="width: 5em;" value="90" list="defaultRates" onchange="parseIcs2XML()" />€/h
+        <input id="geld" type="number" style="width: 5em;" list="defaultRates" onchange="parseCalendarInput()" />€/h
         <label for="vat">VAT </label>
-        <input id="vat" type="number" style="width: 5em;" value="19" list="defaultVATs" onchange="parseIcs2XML()" />%
+        <input id="vat" type="number" style="width: 5em;" value="19" list="defaultVATs" onchange="parseCalendarInput()" />%
       </p>
       <datalist id="defaultRates">
         <option value="0">
@@ -67,6 +67,8 @@
         <input type="button" value="Today" onclick="loadToday()" />
         <input type="button" value="This Week" onclick="loadThisWeek()" />
         <input type="button" value="This Month" onclick="loadThisMonth()" />
+      </p>
+      <p><label><input type="checkbox" id="dailySummaries" onchange="storeShowDailySummary(this.checked)" checked /> Show daily summaries</label>
       </p>
     </fieldset>
     <fieldset><legend>Jobs</legend>

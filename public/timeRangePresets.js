@@ -10,7 +10,7 @@ function formatDate(date) {
 function loadStartEnd(start, end) {
   minAge.value = formatDate(start);
   maxAge.value = formatDate(end);
-  parseIcs2XML()
+  parseCalendarInput()
 }
 
 function loadToday() {

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
   maxAge = document.querySelector('#maxAge');
   populateDropdown();
   populateUserName();
+  populateShowDailySummary()
 
   document.querySelector('#calendarForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the default form submission
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         ics = data
         if (minAge.value === "") loadThisMonth()
-        else parseIcs2XML()
+        else parseCalendarInput()
       })
       .catch(error => console.error('Error fetching calendar:', error));
   });
@@ -39,14 +40,18 @@ document.addEventListener('DOMContentLoaded', function() {
       reader.onload = function(e) {
         ics = e.target.result;
         if (minAge.value === "") loadThisMonth()
-        else parseIcs2XML()
+        else parseCalendarInput()
       }
       reader.readAsText(file);
     }
   })
 })
 
-function parseIcs2XML() {
+function parseCalendarInput() {
+  if (!ics) {
+    alert('No calendar data found.');
+    return
+  }
   jobs.length = 0;
   const jcalData = ICAL.parse(ics);
   const comp = new ICAL.Component(jcalData);
@@ -66,10 +71,13 @@ function parseIcs2XML() {
     const event = new ICAL.Event(vevent);
     const start = getJSDateFromICSDate(event.startDate.toString());
     const end = getJSDateFromICSDate(event.endDate.toString());
-    var duration = (end.getTime()-start.getTime())/1000/60;
-    if (start.getTime()>min.getTime() && start.getTime()<max.getTime()) {
+    const duration = (end.getTime()-start.getTime())/1000/60;
+    if (
+      start.getTime() > min.getTime() &&
+      start.getTime() < max.getTime()
+    ) {
       const summary = event.summary;
-      var job = (summary.split('('))[0].trim()
+      const job = (summary.split('('))[0].trim()
       if (!jobs.includes(job)) jobs.push(job)
       if (!selectedJobs || !selectedJobs.length || selectedJobs.includes(job)) {
         jSONEvents.push({type: 'event', summary, start, end, duration, job})
@@ -79,11 +87,12 @@ function parseIcs2XML() {
   jSONEvents.sort((a, b) => {
     return a.start > b.start ? 1 : -1
   })
-  printXML(jSONEvents, calendarName);
+  renderTimeSheet(jSONEvents, calendarName);
 }
 
-function printXML(json, name) {
-  var result = "<table><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>";
+function renderTimeSheet(json, name) {
+  const showDailySummaries = document.querySelector('#dailySummaries').checked;
+  const result = ["<table><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>"];
   const title = `– ${name} –`
   const selectedJobList = selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""
   document.getElementById('calName').innerText = title + selectedJobList
@@ -97,24 +106,25 @@ function printXML(json, name) {
     if (!currentDate) {
       currentDate = eventDate;
     }
-    if (currentDate !== eventDate) {
-      result += `<tr class="dayTotal"><td colspan="2">${getNiceDateString(new Date(currentDate), true)}</td><td>${humanizeDuration(dayTotal)}</td></tr>`;
+    if (showDailySummaries && currentDate !== eventDate) {
+      result.push(`<tr class="dayTotal"><td colspan="2">${getNiceDateString(new Date(currentDate), true)}</td><td>${humanizeDuration(dayTotal)}</td></tr>`)
       currentDate = eventDate;
       dayTotal = 0; // Reset dayTotal when the day changes
     }
     total += event.duration;
     dayTotal += event.duration;
 
-    result += `<tr><td>${event.summary}</td>`;
-    result += `<td>${getNiceDateString(event.start, false)}</td>`;
-    result += `<td>${humanizeDuration(event.duration)}</td>`;
-    result += `<td class='sort'>${event.start.getTime()}</td></tr>`;
+    result.push(`<tr><td>${event.summary}</td>`)
+    result.push(`<td>${getNiceDateString(event.start, false)}</td>`)
+    result.push(`<td>${humanizeDuration(event.duration)}</td>`)
+    result.push(`<td class='sort'>${event.start.getTime()}</td></tr>`)
   });
 
   // Add the last day's total if necessary
-  if (dayTotal > 0) {
-    result += `<tr class="dayTotal"><td colspan="2">${getNiceDateString(new Date(currentDate), true)}</td><td>${humanizeDuration(dayTotal)}</td></tr>`;
+  if (showDailySummaries && dayTotal > 0) {
+    result.push(`<tr class="dayTotal"><td colspan="2">${getNiceDateString(new Date(currentDate), true)}</td><td>${humanizeDuration(dayTotal)}</td></tr>`)
   }
+  result.push("</tbody>")
 
   function formatCurrency(amount) {
     return `${amount.toLocaleString('de-DE', {
@@ -123,20 +133,20 @@ function printXML(json, name) {
     })} €`;
   }
   const hourDecimal = (total/60).toFixed(2);
-  result += `</tbody><tfoot><tr><th colspan='2'>Total Hours</br /><small>(8h days)</small></th><th>${hourDecimal} h<br /><small>(${Math.floor(total / 60 / 8)}d ${Math.floor((total / 60) % 8)}h ${Math.round(total % 60)}min)</small></th></tr>`;
+  result.push(`<tfoot><tr><th colspan='2'>Total Hours</br /><small>(8h days)</small></th><th>${hourDecimal} h<br /><small>(${Math.floor(total / 60 / 8)}d ${Math.floor((total / 60) % 8)}h ${Math.round(total % 60)}min)</small></th></tr>`)
   const hourlyRate = Number.parseInt(document.querySelector('#geld').value, 10)
   const vat = Number.parseInt(document.querySelector('#vat').value, 10)
   if (hourlyRate !== Number.NaN && hourlyRate > 0 ) {
     const net = formatCurrency(hourDecimal * hourlyRate)
     const tax = formatCurrency(hourDecimal * hourlyRate * vat / 100)
     const gross = formatCurrency(hourDecimal * hourlyRate * ((vat / 100)+1))
-    result += `<tr><th colspan='2'>Net <small>(${hourDecimal} h x ${formatCurrency(hourlyRate)})</small></th><th>${net}</th></tr>`;
-    result += `<tr><td colspan='2'>Value added Tax ${vat}%</td><td>${tax}</td></tr>`;
-    result += `<tr><th colspan='2'>Gross</th><th>${gross}</th></tr>`;
+    result.push(`<tr><th colspan='2'>Net <small>(${hourDecimal} h x ${formatCurrency(hourlyRate)})</small></th><th>${net}</th></tr>`)
+    result.push(`<tr><td colspan='2'>Value added Tax ${vat}%</td><td>${tax}</td></tr>`)
+    result.push(`<tr><th colspan='2'>Gross</th><th>${gross}</th></tr>`)
 
   }
-  result += "</tfoot></table>";
-  document.querySelector('#results').innerHTML = result;
+  result.push("</tfoot></table>")
+  document.querySelector('#results').innerHTML = result.join('\n');
   const jobSelection = [];
   for (var i=0; i<jobs.length; i++) {
     const checked = selectedJobs && selectedJobs.includes(jobs[i]) ? ' checked="checked"' : '';
@@ -149,7 +159,7 @@ function printXML(json, name) {
   document.querySelectorAll('#jobs input[type="checkbox"]').forEach(checkbox => {
     checkbox.addEventListener('click', () => {
       updateSelectedJobs()
-      parseIcs2XML()
+      parseCalendarInput()
       return false
     })
   })
