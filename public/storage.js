@@ -41,7 +41,7 @@ function populateDropdown() {
   dropdown.innerHTML = ''
   let option = document.createElement('option');
   option.value = '';
-  option.textContent = 'Recent Calendars'
+  option.textContent = 'recent calendar'
   dropdown.appendChild(option);
 
   urls.forEach(item => {
