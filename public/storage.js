@@ -61,6 +61,6 @@ function populateDropdown() {
   }
   document.getElementById('urlDropdown').addEventListener('change', onDropdownChange);
   if (urls.length > 0) {
-    document.getElementById('urlDropdown').classList.remove('hidden');
+    document.querySelector('.urlDropdown').classList.remove('hidden');
   }
 }
