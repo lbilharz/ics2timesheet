@@ -7,13 +7,13 @@ let ics
 let webcalURL = undefined
 
 document.addEventListener('DOMContentLoaded', function() {
-  minAge = document.querySelector('#minAge');
-  maxAge = document.querySelector('#maxAge');
+  minAge = document.getElementById('minAge');
+  maxAge = document.getElementById('maxAge');
   populateDropdown();
   populateUserName();
   populateShowDailySummary()
 
-  document.querySelector('#calendarForm').addEventListener('submit', function(event) {
+  document.getElementById('calendarForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the default form submission
     webcalURL = document.getElementById('calendarUrl').value;
     const calendarUrl = "/calendar?url=" + encodeURIComponent(webcalURL);
@@ -27,13 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(error => console.error('Error fetching calendar:', error));
   });
 
-
-  minAge = document.querySelector('#minAge');
-  maxAge = document.querySelector('#maxAge');
-  document.querySelector('#userNameInput').addEventListener('change', function(event) {
-    document.querySelector('#userName').innerHTML = event.target.value;
-  })
-  document.querySelector('#icsFile').addEventListener('change', function(event) {
+  document.getElementById('icsFile').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -91,7 +85,7 @@ function parseCalendarInput() {
 }
 
 function renderTimeSheet(json, name) {
-  const showDailySummaries = document.querySelector('#dailySummaries').checked;
+  const showDailySummaries = document.getElementById('dailySummaries').checked;
   const result = ["<table><thead><tr><th>What</th><th>When</th><th>Duration</th></tr></thead><tbody>"];
   const title = `– ${name} –`
   const selectedJobList = selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""
@@ -133,8 +127,8 @@ function renderTimeSheet(json, name) {
   }
   const hourDecimal = (total/60).toFixed(2);
   result.push(`<tfoot><tr><th colspan='2'>Total Hours</br /><small>(8h days)</small></th><th>${hourDecimal} h<br /><small>(${Math.floor(total / 60 / 8)}d ${Math.floor((total / 60) % 8)}h ${Math.round(total % 60)}min)</small></th></tr>`)
-  const hourlyRate = Number.parseInt(document.querySelector('#geld').value, 10)
-  const vat = Number.parseInt(document.querySelector('#vat').value, 10)
+  const hourlyRate = Number.parseInt(document.getElementById('geld').value, 10)
+  const vat = Number.parseInt(document.getElementById('vat').value, 10)
   if (hourlyRate !== Number.NaN && hourlyRate > 0 ) {
     const net = formatCurrency(hourDecimal * hourlyRate)
     const tax = formatCurrency(hourDecimal * hourlyRate * vat / 100)
@@ -145,7 +139,7 @@ function renderTimeSheet(json, name) {
 
   }
   result.push("</tfoot></table>")
-  document.querySelector('#timesheet__content').innerHTML = result.join('\n');
+  document.getElementById('timesheet__content').innerHTML = result.join('\n');
   const jobSelection = [];
   for (var i=0; i<jobs.length; i++) {
     const checked = selectedJobs && selectedJobs.includes(jobs[i]) ? ' checked="checked"' : '';
@@ -153,7 +147,7 @@ function renderTimeSheet(json, name) {
     jobSelection.push(`<span><input name='tasks' type='checkbox'${checked} value='${jobs[i]}'>${jobs[i]}</span>`)
   }
   jobSelection.push("")
-  document.querySelector('#jobs').innerHTML = jobSelection.join('')
+  document.getElementById('jobs').innerHTML = jobSelection.join('')
 
   document.querySelectorAll('#jobs input[type="checkbox"]').forEach(checkbox => {
     checkbox.addEventListener('click', () => {

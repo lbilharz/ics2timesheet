@@ -1,9 +1,12 @@
 function storeUserName(name) {
   localStorage.setItem('userName', name);
+  populateUserName();
 }
+
 function getStoredUserName() {
   return localStorage.getItem('userName');
 }
+
 function populateUserName() {
   let userName = getStoredUserName();
   if (userName) {
@@ -11,13 +14,16 @@ function populateUserName() {
     document.getElementById('userName').innerHTML = userName;
   }
 }
+
 function storeShowDailySummary(checked) {
   localStorage.setItem('showDailySummary', checked);
   parseCalendarInput()
 }
+
 function getStoreShowDailySummary() {
-  return localStorage.getItem('showDailySummary') === 'true' ;
+  return localStorage.getItem('showDailySummary') === 'true';
 }
+
 function populateShowDailySummary() {
   document.getElementById('dailySummaries').checked = getStoreShowDailySummary() ? 'checked' : '';
 }
@@ -28,9 +34,10 @@ function storeUrl(name, url) {
     console.log('URL already exists in local storage.');
     return false;
   }
-  urls.push({ name, url });
+  urls.push({name, url});
   localStorage.setItem('webcalUrls', JSON.stringify(urls));
 }
+
 function getStoredUrls() {
   return JSON.parse(localStorage.getItem('webcalUrls')) || [];
 }
@@ -56,9 +63,10 @@ function populateDropdown() {
     event.preventDefault();
     const dropdown = document.getElementById('urlDropdown');
     document.getElementById('calendarUrl').value = dropdown.value;
-    if (dropdown.value === '')  return false;
-    document.querySelector('#calendarForm').dispatchEvent(new Event('submit'));
+    if (dropdown.value === '') return false;
+    document.getElementById('calendarForm').dispatchEvent(new Event('submit'));
   }
+
   document.getElementById('urlDropdown').addEventListener('change', onDropdownChange);
   if (urls.length > 0) {
     document.querySelector('.urlDropdown').classList.remove('hidden');
