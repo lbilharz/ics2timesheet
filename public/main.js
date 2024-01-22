@@ -92,7 +92,7 @@ function parseCalendarInput() {
 
 function renderTimeSheet(json, name) {
   const showDailySummaries = document.querySelector('#dailySummaries').checked;
-  const result = ["<table><thead><tr><th>What</th><th>When</th><th>Duration</th><th class='sort' >Sort</th></tr></thead><tbody>"];
+  const result = ["<table><thead><tr><th>What</th><th>When</th><th>Duration</th></tr></thead><tbody>"];
   const title = `– ${name} –`
   const selectedJobList = selectedJobs && selectedJobs.length !== 0 ?" ("+ selectedJobs.join(', ') +")":""
   document.getElementById('calName').innerText = title + selectedJobList
@@ -117,7 +117,6 @@ function renderTimeSheet(json, name) {
     result.push(`<tr><td>${event.summary}</td>`)
     result.push(`<td>${getNiceDateString(event.start, false)}</td>`)
     result.push(`<td>${humanizeDuration(event.duration)}</td>`)
-    result.push(`<td class='sort'>${event.start.getTime()}</td></tr>`)
   });
 
   // Add the last day's total if necessary
@@ -146,7 +145,7 @@ function renderTimeSheet(json, name) {
 
   }
   result.push("</tfoot></table>")
-  document.querySelector('#results').innerHTML = result.join('\n');
+  document.querySelector('#timesheet__content').innerHTML = result.join('\n');
   const jobSelection = [];
   for (var i=0; i<jobs.length; i++) {
     const checked = selectedJobs && selectedJobs.includes(jobs[i]) ? ' checked="checked"' : '';
