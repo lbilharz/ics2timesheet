@@ -67,9 +67,3 @@ th.sort {
   width: 1px;
   border: none;
 }
-
-@media print {
-body { font-size: 0.6em;}
-form, #debug { display: none; }
-}
-
