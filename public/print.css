@@ -7,6 +7,10 @@ body {
   display: none;
 }
 
+.timesheetContainer {
+  width: 95%;
+}
+
 tfoot {
   display: table-row-group;
 }
