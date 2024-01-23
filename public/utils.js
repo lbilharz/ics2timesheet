@@ -33,3 +33,21 @@ function updateSelectedJobs() {
   const checkboxes = document.querySelectorAll('#jobs input[type="checkbox"]:checked');
   selectedJobs = Array.from(checkboxes).map(checkbox => checkbox.value);
 }
+function updateSelectedTags() {
+  const checkboxes = document.querySelectorAll('#hash input[type="checkbox"]:checked');
+  selectedTags = Array.from(checkboxes).map(checkbox => checkbox.value);
+}
+
+function extractHashtags(text) {
+  const hashtagRegex = /#(\w+)/g;
+  const hashtags = text.match(hashtagRegex);
+  return hashtags || []; // Return the array of hashtags, or an empty array if none found
+}
+
+function formatCurrency(amount) {
+  return `${amount.toLocaleString('de-DE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })} €`;
+}
+
