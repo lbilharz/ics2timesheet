@@ -38,6 +38,11 @@ legend {
 }
 .timesheetContainer .timesheet__header {
   grid-row: 3;
+  border: 1px solid;
+  border-bottom: 0;
+  padding:  0.5em;
+  margin-bottom: -1em;
+  text-align: right;
 }
 .timesheetContainer .timesheet__content {
   grid-row: 4;
