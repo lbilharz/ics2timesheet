@@ -15,14 +15,34 @@ function getJSDateFromICSDate(ISODateTime) {
   return new Date(year, month - 1, day, hour, minute);
 }
 
-function getNiceDateString(then, short) {
-  if (short) return padStart(then.getDate()) +"."+ padStart((then.getMonth()+1))+"."+then.getFullYear();
-  return padStart(then.getDate()) +"."+ padStart((then.getMonth()+1))+"."+then.getFullYear() +" "+padStart(then.getHours()) +":"+padStart(then.getMinutes());
+function hourDecimal(totalMinutes) {
+  return toLocaleString(totalMinutes/60)
+}
+
+function humanizeDate(then, short) {
+  const options = short
+    ? { year: 'numeric', month: '2-digit', day: '2-digit' }
+    : { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+
+  return new Intl.DateTimeFormat(locale, options).format(then);
 }
 
 function humanizeDuration(duration) {
-  const hours = duration >= 60 ? Math.floor(duration/60) + "' " : ""
-  return hours + padStart(duration%60) +"\""
+  const days = Math.floor(duration / (60 * 8));
+  const remainingDuration = duration % (60 * 8);
+  const hours = Math.floor(remainingDuration / 60);
+  const minutes = remainingDuration % 60;
+
+  let result = '';
+  if (days > 0) {
+    result += `${days}d `;
+  }
+  if (hours > 0 || days > 0) {
+    result += `${hours}h `;
+  }
+  result += `${padStart(minutes)}′`;
+
+  return result.trim();
 }
 
 function padStart(number, targetLength = 2) {
@@ -44,10 +64,14 @@ function extractHashtags(text) {
   return hashtags || []; // Return the array of hashtags, or an empty array if none found
 }
 
+function toLocaleString(num, digits = 2) {
+  return num.toLocaleString(locale, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })
+}
+
 function formatCurrency(amount) {
-  return `${amount.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })} €`;
+  return `${toLocaleString(amount)} €`;
 }
 
