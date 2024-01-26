@@ -57,7 +57,7 @@ function parseCalendarInput() {
     const end = getJSDateFromICSDate(event.endDate.toString());
     const duration = (end.getTime()-start.getTime())/1000/60;
     if (
-      start.getTime() > fromDate.getTime() &&
+      start.getTime() >= fromDate.getTime() &&
       start.getTime() < untilDate.getTime()
     ) {
       let hashMatch = false
