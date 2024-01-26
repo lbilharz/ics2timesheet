@@ -1,3 +1,5 @@
+const locale = navigator.language || 'de-DE';
+console.log('locale', locale)
 const jobs = []
 let selectedJobs = [];
 const hashtags = []
