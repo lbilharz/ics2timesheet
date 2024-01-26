@@ -1,19 +1,22 @@
 function getJSDateFromICSDate(ISODateTime) {
-  // Check if the string is in ISO 8601 format (with hyphens and colons)
-  if (ISODateTime.includes('-') && ISODateTime.includes('T')) {
+  // Check if the string is in the standard ISO 8601 format (with optional time)
+  if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?$/.test(ISODateTime)) {
     return new Date(ISODateTime);
   }
-  const regex = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/;
+
+  // Handling the custom ICS date format without hyphens and colons
+  const regex = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})$/;
   const match = ISODateTime.match(regex);
 
   if (!match) {
     console.warn('Invalid ICS date format:', ISODateTime);
-    return now // Return current date/time if input is invalid
+    return new Date(); // Return current date/time if input is invalid
   }
 
   const [, year, month, day, hour, minute] = match.map(Number);
   return new Date(year, month - 1, day, hour, minute);
 }
+
 
 function hourDecimal(totalMinutes) {
   return toLocaleString(totalMinutes/60)
