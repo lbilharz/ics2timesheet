@@ -42,8 +42,13 @@ function parseCalendarInput() {
     populateDropdown();
     webcalURL = undefined;
   }
-  const fromDate = new Date(Date.parse(minAge.value +" 00:00:00"));
-  const untilDate = new Date(Date.parse(maxAge.value +" 23:59:59"));
+  const fromDate = new Date(minAge.value);
+  fromDate.setHours(0, 0, 0, 0);
+
+  const untilDate = new Date(maxAge.value);
+  untilDate.setHours(0, 0, 0, 0);
+  untilDate.setDate(untilDate.getDate() + 1); // Move to the start of the next day
+
   const vevents = comp.getAllSubcomponents("vevent");
   const calendarEvents = []
   vevents.forEach(function(vevent) {
