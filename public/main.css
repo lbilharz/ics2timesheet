@@ -22,7 +22,7 @@ legend {
 .timesheetContainer {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
   width: 95vw;
   grid-column-gap: 1em;
   grid-row-gap: 1em;
@@ -33,11 +33,14 @@ legend {
 .timesheetContainer .setup {
   grid-row: 1;
 }
-.timesheetContainer .timesheet__header {
+.timesheetContainer .summary {
   grid-row: 2;
 }
-.timesheetContainer .timesheet__content {
+.timesheetContainer .timesheet__header {
   grid-row: 3;
+}
+.timesheetContainer .timesheet__content {
+  grid-row: 4;
 }
 .setup__container > * {
   padding: .6em;
@@ -55,12 +58,13 @@ legend {
 @media screen and (min-width: 1200px) {
   .timesheetContainer {
     grid-template-columns: 1.5fr 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
   }
-  .timesheetContainer .timesheet__header { grid-area: 1 / 1 / 2 / 2; }
-  .timesheetContainer .timesheet__content { grid-area: 2 / 1 / 3 / 2; }
+  .timesheetContainer .summary { grid-area: 1 / 1 / 2 / 2; }
+  .timesheetContainer .timesheet__header { grid-area: 2 / 1 / 3 / 2; }
+  .timesheetContainer .timesheet__content { grid-area: 3 / 1 / 4 / 2; }
   .timesheetContainer .setup {
-    grid-area: 1 / 2 / 3 / 3;
+    grid-area: 1 / 2 / 4 / 3;
   }
   .setup__container {
     position: sticky;
@@ -98,4 +102,9 @@ tr.dayTotal td {
   color: gray;
   border-top: 4px solid lightgray;
   margin-bottom: .3em;
+}
+
+th small, td small {
+  font-weight: normal;
+  color: #333;
 }
