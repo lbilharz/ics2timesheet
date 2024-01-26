@@ -8,8 +8,7 @@ function renderTitle(calendarName) {
 }
 
 function renderTitleDate(fromDate, untilDate) {
-  document.getElementById('from').innerText = humanizeDate(fromDate, true)
-  document.getElementById('until').innerText = humanizeDate(untilDate, true)
+  document.getElementById('timeframe').innerText = formatDateRange(fromDate, untilDate)
 }
 
 function renderJobSelection() {
