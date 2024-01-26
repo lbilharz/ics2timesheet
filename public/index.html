@@ -88,8 +88,9 @@
           <label> to <input id="maxAge" type="date" onchange="parseCalendarInput()" /></label>
           <small>(including)</small></p>
         <p class="timeframe__presets">
-          <input type="button" value="Last 6 Months" onclick="loadLastMonth(6)" />
-          <input type="button" value="Last Month" onclick="loadLastMonth()" />
+          <input type="button" value="Last 12 Months" onclick="loadLastMonths(12)" />
+          <input type="button" value="Last 6 Months" onclick="loadLastMonths(6)" />
+          <input type="button" value="Last Month" onclick="loadLastMonths()" />
           <input type="button" value="Last Week" onclick="loadLastWeek()" />
           <input type="button" value="Yesterday" onclick="loadYesterday()" />
           <input type="button" value="Today" onclick="loadToday()" />
@@ -112,7 +113,15 @@
       </ul>
     </div>
     <div class="timesheet__header">
-      <h1><span id="userName"></span> <small><br/><span id="calName"></span> <br/><span id="from"></span> – <span id="until"></span></small></h1>
+      <h1>
+        <span id="userName"></span>
+        <br/>
+        <small>
+          <span id="calName"></span>
+          <br/>
+          <span id="timeframe"></span>
+        </small>
+      </h1>
     </div>
     <div class="timesheet__content" id="timesheet__content"></div>
   </div>
