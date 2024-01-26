@@ -67,8 +67,8 @@ function parseCalendarInput() {
           }
         })
       }
-      const job = (summary.split('('))[0].trim()
-      if (!jobs.includes(job)) jobs.push(job)
+      const job = (summary.split(' ('))[0]
+      if (summary.indexOf(' (') !== -1 && !jobs.includes(job)) jobs.push(job)
       if (!hashMatch && selectedTags.length === 0 && (!selectedJobs || !selectedJobs.length || selectedJobs.includes(job))) {
         calendarEvents.push({type: 'event', summary, start, end, duration, job})
       }
