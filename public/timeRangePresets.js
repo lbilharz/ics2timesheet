@@ -28,9 +28,10 @@ function loadThisMonth() {
   var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   loadStartEnd(firstDay, lastDay);
 }
-function loadLastMonth(monthsAgo = 1) {
+
+function loadLastMonths(months = 1) {
   var now = new Date();
-  var firstDay = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
+  var firstDay = new Date(now.getFullYear(), now.getMonth() - months, 1);
   var lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
   loadStartEnd(firstDay, lastDay);
 }
@@ -41,14 +42,18 @@ function loadThisWeek() {
   var differenceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Calculate difference to previous Monday
   var lastMonday = new Date(now);
   lastMonday.setDate(now.getDate() - differenceToMonday); // Set to last Monday
-  loadStartEnd(lastMonday, now);
+  var nextSunday = new Date(lastMonday);
+  nextSunday.setDate(lastMonday.getDate() + 6);
+  loadStartEnd(lastMonday, nextSunday);
 }
+
 function loadLastWeek() {
   const dayOfWeek = now.getDay();
   const differenceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   const lastMonday = new Date(now);
-  lastMonday.setDate(now.getDate() - differenceToMonday - 7);
-  const lastSunday = new Date(lastMonday);
-  lastSunday.setDate(lastMonday.getDate() + 6);
-  loadStartEnd(lastMonday, lastSunday);
+  lastMonday.setDate(now.getDate() - differenceToMonday - 7); // Set to last Monday of previous week
+  const nextSunday = new Date(lastMonday);
+  nextSunday.setDate(lastMonday.getDate() + 6);
+  loadStartEnd(lastMonday, nextSunday);
 }
+
