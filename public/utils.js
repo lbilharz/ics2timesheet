@@ -94,6 +94,10 @@ function updateSelectedTags() {
   selectedTags = Array.from(checkboxes).map(checkbox => checkbox.value);
 }
 
+function extractJob(text) {
+  return (text.split(' ('))[0]
+}
+
 function extractHashtags(text) {
   const hashtagRegex = /#(\w+)/g;
   const hashtags = text.match(hashtagRegex);
