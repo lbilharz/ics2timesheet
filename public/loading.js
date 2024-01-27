@@ -54,37 +54,50 @@ function parseCalendarInput() {
   const calendarEvents = []
   vevents.forEach(function(vevent) {
     const event = new ICAL.Event(vevent);
-    const start = getJSDateFromICSDate(event.startDate.toString());
-    const end = getJSDateFromICSDate(event.endDate.toString());
-    const duration = (end.getTime()-start.getTime())/1000/60;
-    if (
-      start.getTime() >= fromDate.getTime() &&
-      start.getTime() < untilDate.getTime()
-    ) {
-      let hashMatch = false
-      const summary = event.summary;
-      const tags = extractHashtags(summary)
-      if (tags.length > 0) {
-        tags.forEach(tag => {
-          if (!hashtags.includes(tag)) hashtags.push(tag)
-          if (!hashMatch && selectedTags.includes(tag)) {
-            calendarEvents.push({type: 'event', summary, start, end, duration, tag})
-            hashMatch = true
-          }
-        })
+    if (event.isRecurring()) {
+      let iterator = event.iterator();
+      let next;
+      while ((next = iterator.next())) {
+        let start = next.toJSDate();
+        if (start < fromDate) continue // Skip occurrences before your start date
+        if (start > untilDate) break // Break loop if the date is past your end date
+        if (start >= fromDate && start < untilDate) {
+          calendarEvents.push({type: 'event',
+            summary: event.summary,
+            start: start,
+            duration: event.duration.toSeconds()/60,
+          })
+        }
       }
-      const job = (summary.split(' ('))[0]
-      if (summary.indexOf(' (') !== -1 && !jobs.includes(job)) jobs.push(job)
-      if (!hashMatch && selectedTags.length === 0 && (!selectedJobs || !selectedJobs.length || selectedJobs.includes(job))) {
-        calendarEvents.push({type: 'event', summary, start, end, duration, job})
+    } else {
+      const start = event.startDate.toJSDate()
+      if (start >= fromDate && start < untilDate) {
+        calendarEvents.push({
+          type: 'event',
+          summary: event.summary,
+          start,
+          duration: event.duration.toSeconds()/60
+        })
       }
     }
   })
   calendarEvents.sort((a, b) => {
     return a.start > b.start ? 1 : -1
   })
+  calendarEvents.forEach(({summary}) => {
+    if (summary.indexOf(' (') !== -1 && !jobs.includes(extractJob(summary))) jobs.push(extractJob(summary))
+    const tags = extractHashtags(summary)
+    tags.forEach(tag => {
+      if (!hashtags.includes(tag)) hashtags.push(tag)
+    })
+  })
+  // filter out events that are not selected via job/hashtags
+  const filteredCalendarEvents = calendarEvents.filter(({summary}) => {
+    return (selectedTags.length === 0 || extractHashtags(summary).some(tag => selectedTags.includes(tag)))
+      && (!selectedJobs || !selectedJobs.length || selectedJobs.includes(extractJob(summary)))
+  })
   renderTitle(calendarName)
   renderTitleDate(fromDate, untilDate)
-  renderTimeSheet(calendarEvents);
+  renderTimeSheet(filteredCalendarEvents);
 }
 
