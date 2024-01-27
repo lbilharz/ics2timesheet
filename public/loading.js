@@ -37,7 +37,7 @@ function parseCalendarInput() {
   hashtags.length = 0;
   const jcalData = ICAL.parse(ics);
   const comp = new ICAL.Component(jcalData);
-  const calendarName = comp.getFirstPropertyValue("x-wr-calname");
+  const calendarName = comp.getFirstPropertyValue("x-wr-calname") || `calendar-${Math.floor(Math.random() * 1000)}`
   if (webcalURL) {
     storeUrl(calendarName, webcalURL);
     populateDropdown();
