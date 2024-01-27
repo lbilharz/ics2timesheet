@@ -34,6 +34,7 @@ function parseCalendarInput() {
     return
   }
   jobs.length = 0;
+  hashtags.length = 0;
   const jcalData = ICAL.parse(ics);
   const comp = new ICAL.Component(jcalData);
   const calendarName = comp.getFirstPropertyValue("x-wr-calname");
