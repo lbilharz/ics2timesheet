@@ -1,4 +1,3 @@
-
 function formatDate(date) {
   return new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',
@@ -13,47 +12,66 @@ function loadStartEnd(start, end) {
   parseCalendarInput()
 }
 
+function getYesterday(date) {
+  return new Date(date.setDate(date.getDate() - 1))
+}
+
+function getFirstDayOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getLastDayOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}
+
+function getStartOfLastMonths(date, monthsAgo) {
+  return new Date(date.getFullYear(), date.getMonth() - monthsAgo, 1);
+}
+
+function getEndOfLastMonths(date, monthsAgo) {
+  return new Date(date.getFullYear(), date.getMonth() - monthsAgo + 1, 0);
+}
+
+function getStartOfWeek(date) {
+  const dayOfWeek = date.getDay();
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+}
+
+function getEndOfWeek(date) {
+  const startOfWeek = getStartOfWeek(date);
+  return new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6);
+}
+
 function loadToday() {
-  loadStartEnd(now, now);
+  const today = new Date();
+  loadStartEnd(today, today);
 }
 
 function loadYesterday() {
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const today = new Date();
+  const yesterday = getYesterday(today);
   loadStartEnd(yesterday, yesterday);
 }
 
 function loadThisMonth() {
-  var now = new Date();
-  var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  loadStartEnd(firstDay, lastDay);
+  const now = new Date();
+  loadStartEnd(getFirstDayOfMonth(now), getLastDayOfMonth(now));
 }
 
 function loadLastMonths(months = 1) {
-  var now = new Date();
-  var firstDay = new Date(now.getFullYear(), now.getMonth() - months, 1);
-  var lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-  loadStartEnd(firstDay, lastDay);
+  const now = new Date();
+  loadStartEnd(getStartOfLastMonths(now, months), getEndOfLastMonths(now, 1));
 }
 
 function loadThisWeek() {
-  var now = new Date();
-  var dayOfWeek = now.getDay();
-  var differenceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Calculate difference to previous Monday
-  var lastMonday = new Date(now);
-  lastMonday.setDate(now.getDate() - differenceToMonday); // Set to last Monday
-  var nextSunday = new Date(lastMonday);
-  nextSunday.setDate(lastMonday.getDate() + 6);
-  loadStartEnd(lastMonday, nextSunday);
+  const now = new Date();
+  loadStartEnd(getStartOfWeek(now), getEndOfWeek(now));
 }
 
 function loadLastWeek() {
-  const dayOfWeek = now.getDay();
-  const differenceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const lastMonday = new Date(now);
-  lastMonday.setDate(now.getDate() - differenceToMonday - 7); // Set to last Monday of previous week
-  const nextSunday = new Date(lastMonday);
-  nextSunday.setDate(lastMonday.getDate() + 6);
-  loadStartEnd(lastMonday, nextSunday);
+  const startOfThisWeek = getStartOfWeek(new Date());
+  const endOfLastWeek = getYesterday(startOfThisWeek);
+  const startOfLastWeek = getStartOfWeek(endOfLastWeek);
+  loadStartEnd(startOfLastWeek, endOfLastWeek);
 }
 
