@@ -59,7 +59,6 @@ legend {
   margin-left: 6.4em;
 }
 
-
 @media screen and (min-width: 1200px) {
   .timesheetContainer {
     grid-template-columns: 1.5fr 1fr;
@@ -113,3 +112,24 @@ th small, td small {
   font-weight: normal;
   color: #333;
 }
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: rgb(30, 30, 32); /* Dark background */
+    color: rgb(210, 210, 200); /* Light text */
+  }
+  .setup__container > * {
+    background-color: #708090; /* Darker background for settings */
+    color: rgb(240, 240, 220); /* Light text */
+  }
+  legend {
+    text-shadow: 0 0 2px #121212;
+  }
+  thead th, tfoot th, tfoot td {
+    background: #505050;
+  }
+  th small, td small {
+    color: rgb(190, 190, 180); /* Light text */
+  }
+
+}
+
