@@ -3,7 +3,7 @@ body {
   font-size: 0.6em;
 }
 
-.setup {
+.setup, .summary, header{
   display: none;
 }
 
