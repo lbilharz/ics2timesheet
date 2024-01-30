@@ -42,6 +42,17 @@ function getStoredUrls() {
   return JSON.parse(localStorage.getItem('webcalUrls')) || [];
 }
 
+function onDropdownChange(event) {
+  event.preventDefault();
+  const dropdown = document.getElementById('urlDropdown');
+  document.getElementById('calendarUrl').value = dropdown.value;
+  if (dropdown.value === '') return false;
+  document.getElementById('calendarForm').dispatchEvent(new Event('submit'));
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('urlDropdown').addEventListener('change', onDropdownChange);
+});
+
 function populateDropdown() {
   let urls = getStoredUrls();
   let dropdown = document.getElementById('urlDropdown');
@@ -58,16 +69,6 @@ function populateDropdown() {
     option.textContent = item.name;
     dropdown.appendChild(option);
   });
-
-  function onDropdownChange(event) {
-    event.preventDefault();
-    const dropdown = document.getElementById('urlDropdown');
-    document.getElementById('calendarUrl').value = dropdown.value;
-    if (dropdown.value === '') return false;
-    document.getElementById('calendarForm').dispatchEvent(new Event('submit'));
-  }
-
-  document.getElementById('urlDropdown').addEventListener('change', onDropdownChange);
   if (urls.length > 0) {
     document.querySelector('.urlDropdown').classList.remove('hidden');
   }
