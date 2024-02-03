@@ -184,9 +184,30 @@ th small, td small {
   color: var(--color-fg-decent);
 }
 
-@media screen and (min-width: 1200px) {
+[data-info-view] {
+  font-size: 1.2em;
+  background: var(--color-bg);
+  overflow: auto;
+  margin-top: 1em;
+  padding: 0.5em;
+  border-radius: 0.5em;
+  align-items: center;
+}
+[data-info-view] div {
+  max-width: 60em;
+  float: right;
+}
+
+[data-info-view] code {
+  max-width: calc(100vw - 8em);
+  overflow-y: auto;
+  display: inline-block;
+}
+
+@media screen and (min-width: 1000px) {
+  .timeframe__presets { grid-template-columns: repeat(3, 1fr); }
   .timesheetContainer {
-    grid-template-columns: 1.5fr 1fr;
+    grid-template-columns: 1fr min-content;
     grid-template-rows: auto auto 1fr;
   }
   .timesheetContainer header { grid-area: 1 / 1 / 2 / 3; }
