@@ -147,7 +147,15 @@ table {
 td, th {
   padding: 3px;
   text-align: right;
-  border: 1px solid var(--color-fg-light);
+}
+td {
+  border-bottom: 1px solid var(--color-bg-th);
+}
+td:first-child {
+  border-left: 1px solid var(--color-fg-light);
+}
+td:last-child {
+  border-right: 1px solid var(--color-fg-light);
 }
 
 thead th, tfoot th, tfoot td {
@@ -157,6 +165,7 @@ thead th, tfoot th, tfoot td {
 
 td, th {
   text-align: left;
+  border-radius: 0;
 }
 
 td+td, th+th, tfoot th, tfoot td {
